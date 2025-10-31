@@ -1,0 +1,15 @@
+
+public class Zombie : MonoBehaviour
+{
+    [SerializeField] int scoreValue = 18; // Score value awarded when the zombie is destroyed
+
+    private void OnDestroy()
+    {
+        ScoreManager scoreManager = FindFirstObjectByType<ScoreManager>(); // Find the ScoreManager in the scene
+        if (scoreManager != null) // Check if ScoreManager was found
+        {
+            scoreManager.AddScore(scoreValue); // Add score to the player's total
+        }
+    }
+}
+/// When a zombie is destroyed, this script finds the ScoreManager in the scene and, if it exists, adds a set number of points (scoreValue) to the player’s total score.

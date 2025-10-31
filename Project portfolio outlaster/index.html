@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Project outlaster</title>
+
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+
+  <style>
+    body {
+      margin: 50;
+      height: 100vh;
+      background-image: url('background123.jpeg');
+      background-size: cover;        /* makes it cover the whole screen */
+      background-position: center;   /* centers the image */
+      background-repeat: repeat;  /* prevents tiling */
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    select {
+      padding: 8px;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    pre {
+      background: #1e1e1e;
+      color: #dcdcdc;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    .video-loop-container {
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    video.loop-video {
+      width: 300px;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .video-container {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    video {
+      width: 80%;
+      max-width: 800px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    p {
+        justify-content: center;
+        color: #1e1e1e;
+    }
+    h4 {
+        color: #1e1e1e;
+    }
+  </style>
+</head>
+<body>
+<img src="OutlasterLogo.png" alt="Outlaster Logo" width="200">
+    <h1>
+        my roles in this project:
+    </h1>
+    <ul>
+        <li>making the animations work in unity</li>
+        <li>making music/sounds</li>
+        <li>making a player health system</li>
+        <li>making a zombie damage and health system</li>
+        <li>making a point system</li>
+    </ul>
+    <h1>what kind of Project?</h1>
+    <p2>
+        Outlaster is a 2d Microgame zombie shooter made in Unity.
+        The game is inspired by multiple 2d topdown games and with a zombie shooter aspect
+        the Project lasted around 4 weeks and was made in a team of 3 people.
+        it was challanging using new techniques and learning how to work with a team
+        but overall it was a great experience and I learned a lot about game development and teamwork.
+    </p2>
+
+<div class="video-loop-container">
+  <h3>Preview Animation</h3>
+  <video class="loop-video" autoplay loop muted playsinline>
+    <source src="1031.mp4" type="video/mp4">
+  </video>
+</div>
+
+<h2>View My Code</h2>
+
+<select id="fileSelect">
+  <option value="">-- Select a file --</option>
+  <option value="PlayerHealth.txt">PlayerHealth</option>
+  <option value="Zombie.txt">Zombie</option>
+  <option value="ZombieManager.txt">ZombieManager</option>
+</select>
+
+<pre id="codeContainer">
+  <code class="language-csharp">Select a file...</code>
+</pre>
+
+<h4>my experience working on the project</h4>
+<p>
+    working on this project was a great experience for me because it was my 3rd time working with a team on a game project.
+    I learned more about how to work with others and how to communicate effectively.
+    I also learned more about game development and the different aspects of making a game.
+    Overall, I had a great time working on this project and I am proud of what we accomplished as a team.
+</p>
+
+
+<div class="video-container">
+  <h3> Outlaster Project Promo Video</h3>
+  <video controls>
+    <source src="Promo Video Final Final.mp4" type="video/mp4">
+  </video>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/csharp.min.js"></script>
+
+<script>
+  const select = document.getElementById('fileSelect');
+  const codeContainer = document.getElementById('codeContainer');
+
+  select.addEventListener('change', async () => {
+    const file = select.value;
+
+    if (!file) {
+      codeContainer.innerHTML = '<code class="language-csharp">Select a file...</code>';
+      hljs.highlightElement(codeContainer.querySelector('code'));
+      return;
+    }
+
+    try {
+      const response = await fetch(file);
+      if (!response.ok) throw new Error('Failed to load file');
+      const text = await response.text();
+
+      const newCode = document.createElement('code');
+      newCode.className = 'language-csharp';
+      newCode.textContent = text;
+
+      codeContainer.innerHTML = '';
+      codeContainer.appendChild(newCode);
+
+      hljs.highlightElement(newCode);
+    } catch (error) {
+      codeContainer.innerHTML = '<code class="language-csharp">Error loading file.</code>';
+      console.error(error);
+    }
+  });
+</script>
+
+</body>
+</html>

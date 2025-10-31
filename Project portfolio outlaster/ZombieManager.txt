@@ -1,0 +1,111 @@
+using UnityEngine;
+
+public class ZombieManager : MonoBehaviour
+{
+    [SerializeField] PlayerHealth pHealth; // Reference to the player's health script
+    [SerializeField] public float damage = 10f; // Damage dealt to player on contact
+    [SerializeField] float damageCooldown = 0.25f; // Cooldown between damage instances
+    [SerializeField] public int ZombieHealth = 50; // Health of the zombie
+
+    [SerializeField] GameObject selectionMarker; // Visual marker for selection
+
+    public AudioSource audioSource; // Audio source for playing sounds
+    public AudioClip[] idleClips; // Array of idle sound clips
+    public float idlePlayChance = 0.7f; // Chance to play an idle sound
+    public float idleVolume = 1f; // Volume for idle sounds
+    public float minIdleDelay = 3f; // Minimum delay between idle sounds
+    public float maxIdleDelay = 8f; // Maximum delay between idle sounds
+    bool canDamage = true; // Flag to control damage cooldown
+    float idleTimer; // Timer for idle sound playback
+
+    // Fallback sprite renderer if no marker assigned
+    SpriteRenderer fallbackSprite;
+    Color fallbackOriginalColor = Color.white;
+    [SerializeField] Color selectedColor = Color.yellow;
+
+    void Start()
+    {
+        pHealth = FindFirstObjectByType<PlayerHealth>(); // Find the player's health script
+        audioSource = FindFirstObjectByType<AudioSource>(); // Find the audio source in the scene
+
+        // Ensure marker is disabled at start
+        if (selectionMarker != null)
+            selectionMarker.SetActive(false);
+
+        // Prepare fallback sprite renderer
+        if (selectionMarker == null)
+        {
+            fallbackSprite = GetComponentInChildren<SpriteRenderer>();
+            if (fallbackSprite != null)
+                fallbackOriginalColor = fallbackSprite.color;
+        }
+    }
+
+    void Update()
+    {
+        if (ZombieHealth <= 0) // Check if zombie is dead
+        {
+            EnemySpawner.onEnemyDestroy.Invoke(); // Notifys EnemySpawner
+            Destroy(gameObject); // Destroy the zombie game object
+        }
+
+        idleTimer -= Time.deltaTime; // Decrease idle timer
+        if (idleTimer <= 0f) // Check if it's time to play an idle sound
+        {
+            if (idleClips != null && idleClips.Length > 0) // Check if there are idle clips available
+            {
+                if (Random.value <= idlePlayChance) // Check if we should play a sound based on chance
+                {
+                    int i = Random.Range(0, idleClips.Length);
+                    audioSource.PlayOneShot(idleClips[i], idleVolume);
+                }
+            }
+            ResetIdleTimer(); // Reset the idle timer
+        }
+    }
+    void ResetIdleTimer()
+    {
+        idleTimer = Random.Range(minIdleDelay, maxIdleDelay); // Set a new random idle timer
+    }
+
+    private void OnTriggerStay2D(Collider2D other) // Called when another collider stays within this collider
+    {
+        if (pHealth != null && other.CompareTag("Player") && canDamage) // Check if it's the player and we can deal damage
+        {
+            pHealth.TakeDamage(damage); // Deal damage to the player
+            canDamage = false; // Set canDamage to false to start cooldown
+            Invoke(nameof(DamageCooldown), damageCooldown); // Invoke the cooldown method after the specified time
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other) // Called when another collider exits this collider
+    {
+        if (other.CompareTag("Player")) // Check if it's the player
+        {
+            // Reset when player leaves so damage works again on re-entry
+            canDamage = true;
+        }
+    }
+
+    private void DamageCooldown()
+    {
+        canDamage = true;
+    }
+
+    // Called by external code to visually mark/unmark this zombie as targeted
+    public void SetSelected(bool selected)
+    {
+        if (selectionMarker != null) // Use selection marker if assigned
+        {
+            selectionMarker.SetActive(selected); // Show or hide the marker
+            return;
+        }
+
+        // Fallback: tint sprite if no marker exists
+        if (fallbackSprite != null)
+        {
+            fallbackSprite.color = selected ? selectedColor : fallbackOriginalColor;
+        }
+    }
+}
+/// This script controls each zombie’s core behavior — including health, attacking the player, and showing when it’s selected. It tracks the zombie’s health (ZombieHealth) and destroys the zombie when it reaches zero, notifying the EnemySpawner. It damages the player through OnTriggerStay2D whenever the zombie stays in contact with the player, with a short cooldown between hits to prevent constant damage. It also plays random idle sound clips at random intervals to make the zombie feel more alive, using a chance-based system. The SetSelected method visually marks the zombie as targeted, either by showing a selection marker or changing its color if no marker exists.

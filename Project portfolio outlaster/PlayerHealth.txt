@@ -1,0 +1,67 @@
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+public class PlayerHealth : MonoBehaviour
+{
+    public float health; // current health
+    public float maxHealth; // maximum health
+    public Image healthbar; // UI health bar
+
+    [Header("Regeneration Settings")]
+    [SerializeField] float regenRate = 0.5f; // health per second
+    [SerializeField] float regenDelay = 57; // seconds after damage before regen starts
+    [SerializeField] float regenResetDelay = 7f; // delay reset if damaged during regen
+    [SerializeField] GameObject gameOver;
+
+    float regenTimer = 0f; // timer for regeneration delay
+    public bool isRegenerating = false; // flag to indicate if regeneration is active
+
+
+    void Start()
+    {
+        maxHealth = health; // set max health to starting health
+        gameOver.SetActive(false); // ensure game over UI is hidden at start
+
+    }
+
+    void Update()
+    {
+        healthbar.fillAmount = health / maxHealth; // update health bar UI
+        if (health == 0 || health < 0) // check for player death
+
+        {
+            gameOver.SetActive(true); // show game over UI
+            Time.timeScale = 0f; // pause the game
+
+        }
+
+
+        if (isRegenerating && health < maxHealth) // regenerate health
+        {
+            health += regenRate * Time.deltaTime; // increase health based on regen rate
+            if (health > maxHealth) health = maxHealth; // clamp health to max
+        }
+    }
+
+    public void TakeDamage(float amount) // method to apply damage to player
+    {
+        health -= amount; // reduce health by damage amount
+        if (health < 0) health = 0; // clamp health to zero
+        
+            regenTimer = isRegenerating ? regenResetDelay : regenDelay; // reset regen timer based on current state
+            isRegenerating = false; // stop regeneration
+            CancelInvoke(nameof(StartRegeneration)); // cancel any pending regen start
+            Invoke(nameof(StartRegeneration), regenTimer);// schedule regen start after delay
+
+    }
+    
+
+    void StartRegeneration()
+    {
+        isRegenerating = true; // start health regeneration
+
+    }
+}
+/// This script manages the player’s health system, including taking damage, regenerating health, updating the health bar, and handling game-over logic. It decreases health when damage is taken, ensures it never goes below zero, and stops any ongoing regeneration before restarting it after a delay. The regeneration system gradually restores health over time after the player has avoided damage for a set period. The script also updates the UI health bar each frame and triggers the game-over screen (pausing the game) when health reaches zero.
